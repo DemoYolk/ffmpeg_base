@@ -5,7 +5,13 @@
 
 #include <android/audiotrack.h>
 #include <android/surface.h>
-
+/**
+ * 输出类；用于音频和视频的输出。 从网上了解到，使用了android自带的音频流和图像的类，所以这儿只是对libjniaudio.so和libjnivideo.so的封装。
+ * 这个有个问题是，现在使用的这两个库文件是在2.2的android源目录树下编译生成的，
+ * 如果要在其他android版本中使用需要重新在源目录树编译（或许有其他解决办法。）。
+ *
+ * 所以这儿的cpp都是对android相同功能的封装。
+ */
 class Output
 {
 public:	

@@ -404,6 +404,21 @@ typedef struct AVIndexEntry {
  * version bump.
  * sizeof(AVStream) must not be used outside libav*.
  */
+
+/**
+ *  AVStream
+	该结构体描述一个媒体流
+	主要域的释义如下，其中大部分域的值可以由av_open_input_file根据文件头的信息确定，缺少的信息需要通过调用av_find_stream_info读帧及软解码进一步获取：
+	index/id：index对应流的索引，这个数字是自动生成的，根据index可以从AVFormatContext::streams表中索引到该流；而id则是流的标识，依赖于具体的容器格式。比如对于MPEG TS格式，id就是pid。
+	time_base：流的时间基准，是一个实数，该流中媒体数据的pts和dts都将以这个时间基准为粒度。通常，使用av_rescale/av_rescale_q可以实现不同时间基准的转换。
+	start_time：流的起始时间，以流的时间基准为单位，通常是该流中第一个帧的pts。
+	duration：流的总时间，以流的时间基准为单位。
+	need_parsing：对该流parsing过程的控制域。
+	nb_frames：流内的帧数目。
+	r_frame_rate/framerate/avg_frame_rate：帧率相关。
+	codec：指向该流对应的AVCodecContext结构，调用av_open_input_file时生成。
+	parser：指向该流对应的AVCodecParserContext结构，调用av_find_stream_info时生成。
+ */
 typedef struct AVStream {
     int index;    /**< stream index in AVFormatContext */
     int id;       /**< format-specific stream ID */
@@ -572,11 +587,33 @@ typedef struct AVChapter {
 #endif
 
 /**
- * Format I/O context.
+ * Format I/O context. （输入输出流类型的上下文）
  * New fields can be added to the end with minor version bumps.
+ * （新的域能够被加入到次要版本的后面）
  * Removal, reordering and changes to existing fields require a major
  * version bump.
+ *
  * sizeof(AVFormatContext) must not be used outside libav*.
+ */
+
+/*
+ *  AVFormatContext
+	这个结构体描述了一个媒体文件或媒体流的构成和基本信息
+	这是FFMpeg中最为基本的一个结构，是其他所有结构的根，是一个多媒体文件或流的根本抽象。其中:
+	nb_streams和streams所表示的AVStream结构指针数组包含了所有内嵌媒体流的描述；
+	iformat和oformat指向对应的demuxer和muxer指针；
+	pb则指向一个控制底层数据读写的ByteIOContext结构。
+	start_time和duration是从streams数组的各个AVStream中推断出的多媒体文件的起始时间和长度，以微妙为单位。
+	通常，这个结构由av_open_input_file在内部创建并以缺省值初始化部分成员。但是，如果调用者希望自己创建该结构，则需要显式为该结构的一些成员置缺省值——如果没有缺省值的话，会导致之后的动作产生异常。以下成员需要被关注：
+	probesize
+	mux_rate
+	packet_size
+	flags
+	max_analyze_duration
+	key
+	max_index_size
+    max_picture_buffer
+    max_delay
  */
 typedef struct AVFormatContext {
     const AVClass *av_class; /**< Set by avformat_alloc_context. */
@@ -585,7 +622,7 @@ typedef struct AVFormatContext {
     struct AVOutputFormat *oformat;
     void *priv_data;
     ByteIOContext *pb;
-    unsigned int nb_streams;
+    unsigned int nb_streams; //内嵌的流个数
     AVStream *streams[MAX_STREAMS];
     char filename[1024]; /**< input or output filename */
     /* stream info */

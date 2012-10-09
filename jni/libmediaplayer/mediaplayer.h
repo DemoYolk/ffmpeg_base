@@ -157,7 +157,7 @@ private:
 	static void*				startPlayer(void* ptr); // 开始播放器
 
 	static void 				decode(AVFrame* frame, double pts); // 解码 帧数据
-	static void 				decode(int16_t* buffer, int buffer_size); // 解码 缓冲的数据
+	static void 				decodeAudio(int16_t* buffer, int buffer_size); // 将 缓冲的数据 写入 音频轨迹
 
 	void						decodeMovie(void* ptr); // 解码 电影？
 	

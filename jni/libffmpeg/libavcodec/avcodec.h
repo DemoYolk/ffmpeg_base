@@ -957,6 +957,37 @@ typedef struct AVPanScan{
 #define FF_BUFFER_HINTS_PRESERVE 0x04 // User must not alter buffer content.
 #define FF_BUFFER_HINTS_REUSABLE 0x08 // Codec will reuse the buffer (update).
 
+/**
+ *  AVPacket
+	AVPacket定义在avcodec.h中
+	FFMPEG使用AVPacket来暂存解复用之后、解码之前的媒体数据（一个音/视频帧、一个字幕包等）及附加信息（解码时间戳、显示时间戳、时长等）。其中：
+	dts表示解码时间戳，pts表示显示时间戳，它们的单位是所属媒体流的时间基准。
+	stream_index给出所属媒体流的索引；
+	data为数据缓冲区指针，size为长度；
+	duration为数据的时长，也是以所属媒体流的时间基准为单位；
+	pos表示该数据在媒体流中的字节偏移量；
+	destruct为用于释放数据缓冲区的函数指针；
+	flags为标志域，其中，最低为置1表示该数据是一个关键帧。
+	AVPacket 结构本身只是个容器，它使用data成员指向实际的数据缓冲区，
+	这个缓冲区可以通过av_new_packet创建，可以通过av_dup_packet 拷贝，
+	也可以由FFMPEG的API产生（如av_read_frame），
+	使用之后需要通过调用av_free_packet释放。
+	 av_free_packet调用的是结构体本身的destruct函数，
+	 它的值有两种情况：
+	 1)av_destruct_packet_nofree或 0；
+	 2)av_destruct_packet，其中，前者仅仅是将data和size的值清0而已，后者才会真正地释放缓冲区。
+	 FFMPEG内部使用 AVPacket结构建立缓冲区装载数据，同时提供destruct函数，
+	 如果FFMPEG打算自己维护缓冲区，则将destruct设为 av_destruct_packet_nofree，
+	 用户调用av_free_packet清理缓冲区时并不能够将其释放；如果FFMPEG不会再使用 该缓冲区，
+	 则将destruct设为av_destruct_packet，表示它能够被释放。
+	 对于缓冲区不能够被释放的AVPackt，用户在使用之前 最好调用av_dup_packet进行缓冲区的克隆，
+	 将其转化为缓冲区能够被释放的AVPacket，以免对缓冲区的不当占用造成异常错误。
+	 而 av_dup_packet会为destruct指针为av_destruct_packet_nofree的AVPacket新建一个缓冲区，
+	 然后将原 缓冲区的数据拷贝至新缓冲区，置data的值为新缓冲区的地址，
+	 同时设destruct指针为av_destruct_packet。
+ */
+
+
 typedef struct AVPacket {
     /**
      * Presentation timestamp in AVStream->time_base units; the time at which
@@ -1028,6 +1059,18 @@ typedef struct AVFrame {
  * Removal, reordering and changes to existing fields require a major
  * version bump.
  * sizeof(AVCodecContext) must not be used outside libav*.
+ */
+
+/**
+ *  AVCodecContext
+	这是一个描述编解码器上下文的数据结构，包含了众多编解码器需要的参数信息
+	如 果是单纯使用libavcodec，这部分信息需要调用者进行初始化；如果是使用整个FFMPEG库，这部分信息在调用 av_open_input_file和av_find_stream_info的过程中根据文件的头信息及媒体流内的头部信息完成初始化。其中几个主要 域的释义如下：
+	extradata/extradata_size： 这个buffer中存放了解码器可能会用到的额外信息，在av_read_frame中填充。一般来说，首先，某种具体格式的demuxer在读取格式头 信息的时候会填充extradata，其次，如果demuxer没有做这个事情，比如可能在头部压根儿就没有相关的编解码信息，则相应的parser会继 续从已经解复用出来的媒体流中继续寻找。在没有找到任何额外信息的情况下，这个buffer指针为空。
+	time_base：
+	width/height：视频的宽和高。
+	sample_rate/channels：音频的采样率和信道数目。
+	sample_fmt： 音频的原始采样格式。
+	codec_name/codec_type/codec_id/codec_tag：编解码器的信息。
  */
 typedef struct AVCodecContext {
     /**
