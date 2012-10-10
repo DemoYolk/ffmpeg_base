@@ -4,7 +4,9 @@
 #define TAG "FFMpegVideoDecoder"
 
 static uint64_t global_video_pkt_pts = AV_NOPTS_VALUE;
-
+/**
+ * 初始化
+ */
 DecoderVideo::DecoderVideo(AVStream* stream) : IDecoder(stream)
 {
 	 mStream->codec->get_buffer = getBuffer;
@@ -14,10 +16,12 @@ DecoderVideo::DecoderVideo(AVStream* stream) : IDecoder(stream)
 DecoderVideo::~DecoderVideo()
 {
 }
-
+/**
+ * 准备
+ */
 bool DecoderVideo::prepare()
 {
-	mFrame = avcodec_alloc_frame();
+	mFrame = avcodec_alloc_frame(); //取得一个ffmpeg的默认大小的帧的指针
 	if (mFrame == NULL) {
 		return false;
 	}
@@ -42,7 +46,9 @@ double DecoderVideo::synchronize(AVFrame *src_frame, double pts) {
 	mVideoClock += frame_delay;
 	return pts;
 }
-
+/**
+ * 处理数据
+ */
 bool DecoderVideo::process(AVPacket *packet)
 {
     int	completed;
@@ -116,6 +122,9 @@ int DecoderVideo::getBuffer(struct AVCodecContext *c, AVFrame *pic) {
 	pic->opaque = pts;
 	return ret;
 }
+/**
+ * 释放帧
+ */
 void DecoderVideo::releaseBuffer(struct AVCodecContext *c, AVFrame *pic) {
 	if (pic)
 		av_freep(&pic->opaque);

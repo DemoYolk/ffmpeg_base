@@ -22,7 +22,7 @@ public class FFMpeg {
 	};
 
 	public static final String[] EXTENSIONS = new String[] { ".mp4", ".flv",
-			".avi", ".wmv" };
+			".avi", ".wmv", ".mp3" };
 
 	private static boolean sLoaded = false;
 	private Thread mThread;

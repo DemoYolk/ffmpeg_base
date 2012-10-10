@@ -75,8 +75,8 @@ public class FFMpegMovieViewAndroid extends SurfaceView {
 	 */
 	public void setVideoPath(String filePath) throws IllegalArgumentException,
 			IllegalStateException, IOException {
-		// mPlayer.setDataSource(filePath);
-		mPlayer.setDataSource("http://img.pems.cn/interpose/decompression/file/20/00/01/10/200001108/intervention_address_200001108.flv");
+		mPlayer.setDataSource(filePath);
+		// mPlayer.setDataSource("http://img.pems.cn/interpose/decompression/file/20/00/01/10/200001108/intervention_address_200001108.flv");
 		Log.i(TAG, "mPlayer is setDataSourced!");
 	}
 

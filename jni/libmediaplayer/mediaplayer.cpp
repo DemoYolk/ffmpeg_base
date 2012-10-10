@@ -355,9 +355,11 @@ void MediaPlayer::decodeMovie(void* ptr)
 	
 	mCurrentState = MEDIA_PLAYER_STARTED;
 	__android_log_print(ANDROID_LOG_INFO, TAG, "playing %ix%i", mVideoWidth, mVideoHeight);
+	//这个线程是在取出文件中的视频包和音频包并将其放入到 对因解码器的解码包队列中，直到程序暂停或解码完毕或解码错误
 	while (mCurrentState != MEDIA_PLAYER_DECODED && mCurrentState != MEDIA_PLAYER_STOPPED &&
 		   mCurrentState != MEDIA_PLAYER_STATE_ERROR)
 	{
+		//如果 解码包队列大约了 规定的 大小，暂停200毫秒 等待解码线程，再继续 向其中添加数据
 		if (mDecoderVideo->packets() > FFMPEG_PLAYER_MAX_QUEUE_SIZE &&
 				mDecoderAudio->packets() > FFMPEG_PLAYER_MAX_QUEUE_SIZE) {
 			usleep(200);
@@ -365,6 +367,7 @@ void MediaPlayer::decodeMovie(void* ptr)
 		}
 		
 		if(av_read_frame(mMovieFile, &pPacket) < 0) {
+			//如果在文件中不能读出完整的一帧，则认为是解码完毕
 			mCurrentState = MEDIA_PLAYER_DECODED;
 			continue;
 		}
@@ -385,11 +388,13 @@ void MediaPlayer::decodeMovie(void* ptr)
 	//waits on end of video thread
 	__android_log_print(ANDROID_LOG_ERROR, TAG, "waiting on video thread");
 	int ret = -1;
+	//阻塞等待视频解码结束
 	if((ret = mDecoderVideo->wait()) != 0) {
 		__android_log_print(ANDROID_LOG_ERROR, TAG, "Couldn't cancel video thread: %i", ret);
 	}
 	
 	__android_log_print(ANDROID_LOG_ERROR, TAG, "waiting on audio thread");
+	//阻塞等待音频解码结束
 	if((ret = mDecoderAudio->wait()) != 0) {
 		__android_log_print(ANDROID_LOG_ERROR, TAG, "Couldn't cancel audio thread: %i", ret);
 	}
@@ -461,7 +466,7 @@ status_t MediaPlayer::getCurrentPosition(int *msec)
 	if (mCurrentState < MEDIA_PLAYER_PREPARED) {
 		return INVALID_OPERATION;
 	}
-	*msec = 0/*av_gettime()*/;
+	*msec = 0/*av_gettime()*/;//TODO
 	//__android_log_print(ANDROID_LOG_INFO, TAG, "position %i", *msec);
 	return NO_ERROR;
 }

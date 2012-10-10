@@ -91,7 +91,12 @@ int PacketQueue::get(AVPacket *pkt, bool block)
 {
 	AVPacketList *pkt1;
     int ret;
-	
+	/**
+	 * pthread_mutex_lock()函数锁住由mutex指定的mutex 对象。
+	 * 如果mutex已经被锁住，调用这个函数的线程阻塞直到mutex可用为止。
+	 * 这跟函数返回的时候参数mutex指定的mutex对象变成锁住状态，
+	 * 同时该函数的调用线程成为该mutex对象的拥有者。
+	 */
     pthread_mutex_lock(&mLock);
 	
     for(;;) {
@@ -115,7 +120,17 @@ int PacketQueue::get(AVPacket *pkt, bool block)
             ret = 0;
             break;
         } else {
-			pthread_cond_wait(&mCondition, &mLock);
+        	/**
+        	 * 条件变量是利用线程间共享的全局变量进行同步的一种机制，
+        	 * 主要包括两个动作：一个线程等待;
+        	 * 条件变量的条件成立;而挂起；
+        	 * 另一个线程使;条件成立;（给出条件成立信号）。
+        	 * 为了防止竞争，条件变量的使用总是和一个互斥锁结合在一起。
+        	 * 激发条件有两种形式，pthread_cond_signal()激活一个等待该条件的线程，
+        	 * 存在多个等待线程时按入队顺序激活其中一个；
+        	 * 而pthread_cond_broadcast()则激活所有等待线程。
+        	 */
+			pthread_cond_wait(&mCondition, &mLock);//这儿判断如果队列中没有包可以解码就等待挂起，通过put方法放入包可激活
 		}
 
     }
@@ -123,7 +138,9 @@ int PacketQueue::get(AVPacket *pkt, bool block)
     return ret;
 	
 }
-
+/**
+ * 退出，通过 不能在 队列里取出 包 实现
+ */
 void PacketQueue::abort()
 {
     pthread_mutex_lock(&mLock);
