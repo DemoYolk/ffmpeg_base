@@ -38,7 +38,7 @@ public class FFMpeg {
 			throw new FFMpegException(FFMpegException.LEVEL_FATAL,
 					"Couldn't load native libs");
 		}
-		native_avcodec_register_all();
+		// native_avcodec_register_all(); //完全没有必要运行这个函数，因为下面那个方法已经内部调用了 这个方法。
 		native_av_register_all();
 		mConverting = false;
 	}

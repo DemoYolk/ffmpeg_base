@@ -4484,7 +4484,7 @@ static jint FFMpeg_release(JNIEnv *env, jobject obj, jint result) {
  * JNI registration.
  */
 static JNINativeMethod methods[] = {
-	{ "native_avcodec_register_all", "()V", (void*) avcodec_register_all },
+	//{ "native_avcodec_register_all", "()V", (void*) avcodec_register_all }, //感觉多余的本地方法，因为ava_register_all内部已经调用了这个方法
 	//{ "native_avdevice_register_all", "()V", (void*) avdevice_register_all },
 	//{ "native_avfilter_register_all", "()V", (void*) avfilter_register_all },
 	{ "native_av_register_all", "()V", (void*) av_register_all },

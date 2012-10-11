@@ -35,7 +35,9 @@
 #define REGISTER_PROTOCOL(X,x) { \
     extern URLProtocol x##_protocol; \
     if(CONFIG_##X##_PROTOCOL) av_register_protocol(&x##_protocol); }
-
+/**
+ * 注册 所有的可用的东西，包含 编解码器 和 合解复用器
+ */
 void av_register_all(void)
 {
     static int initialized;

@@ -29,9 +29,11 @@
 
 
 #include "avformat.h"
-
+/**
+ * 元数据
+ */
 struct AVMetadata{
-    int count;
+    int count; //个数
     AVMetadataTag *elems;
 };
 

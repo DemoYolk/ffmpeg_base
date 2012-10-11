@@ -42,9 +42,12 @@ public:
 private:
     JNIFFmpegMediaPlayerListener();
     jclass      mClass;     // Reference to MediaPlayer class
-    jobject     mObject;    // Weak ref to MediaPlayer Java object to call on
+    jobject     mObject;    // Weak ref to MediaPlayer Java object to call on （感觉没什么实际用途，和上面的mClass指向的同一个对象。）
 };
-
+/**
+ * 传入的 JNIEnv* env是当前线程的，JNIEnv *env指针不可为多个线程共用,但是java虚拟机的JavaVM指针是整个jvm公用的，我们可以通过JavaVM来得到当前线程的JNIEnv指针.
+ * 传入的 jobjec thiz 是调用这个函数对应的java对象，现在这个就是FFMpegPlayer.java这个对象
+ */
 JNIFFmpegMediaPlayerListener::JNIFFmpegMediaPlayerListener(JNIEnv* env, jobject thiz, jobject weak_thiz)
 {
     // Hold onto the MediaPlayer class for use in calling the static method
@@ -56,8 +59,8 @@ JNIFFmpegMediaPlayerListener::JNIFFmpegMediaPlayerListener(JNIEnv* env, jobject 
     }
     mClass = (jclass)env->NewGlobalRef(clazz);
 
-    // We use a weak reference so the MediaPlayer object can be garbage collected.
-    // The reference is only used as a proxy for callbacks.
+    // We use a weak reference so the MediaPlayer object can be garbage collected. (我们用这个弱引用是因为这样他就能被垃圾回收)
+    // The reference is only used as a proxy for callbacks.  （这个引用只能用作 代理回调）
     mObject  = env->NewGlobalRef(weak_thiz);
 }
 
@@ -72,6 +75,7 @@ JNIFFmpegMediaPlayerListener::~JNIFFmpegMediaPlayerListener()
 void JNIFFmpegMediaPlayerListener::notify(int msg, int ext1, int ext2)
 {
     JNIEnv *env = getJNIEnv();
+    //回调java的private static void postEventFromNative(Object mediaplayer_ref, int what,int arg1, int arg2, Object obj)，
     env->CallStaticVoidMethod(mClass, fields.post_event, mObject, msg, ext1, ext2, 0);
 }
 

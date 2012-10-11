@@ -621,10 +621,10 @@ typedef struct AVFormatContext {
     struct AVInputFormat *iformat;
     struct AVOutputFormat *oformat;
     void *priv_data;
-    ByteIOContext *pb;
+    ByteIOContext *pb; //从调试里看到 被初始化为 32KB
     unsigned int nb_streams; //内嵌的流个数
     AVStream *streams[MAX_STREAMS];
-    char filename[1024]; /**< input or output filename */
+    char filename[1024]; /**< input or output filename 包含路径的*/
     /* stream info */
     int64_t timestamp;
 #if LIBAVFORMAT_VERSION_INT < (53<<16)
@@ -693,12 +693,12 @@ typedef struct AVFormatContext {
 #define AVFMT_FLAG_RTP_HINT     0x0040 ///< Add RTP hinting to the output file
 
     int loop_input;
-    /** decoding: size of data to probe; encoding: unused. */
+    /** decoding: size of data to probe; encoding: unused. 5000000B = 5MB*/
     unsigned int probesize;
 
     /**
      * Maximum time (in AV_TIME_BASE units) during which the input should
-     * be analyzed in av_find_stream_info().
+     * be analyzed in av_find_stream_info(). 5000000B = 5MB
      */
     int max_analyze_duration;
 
@@ -733,12 +733,16 @@ typedef struct AVFormatContext {
      * this.
      * muxing  : unused
      * demuxing: set by user
+     *
+     * default:1048576B = 1MB
      */
     unsigned int max_index_size;
 
     /**
      * Maximum amount of memory in bytes to use for buffering frames
      * obtained from realtime capture devices.
+     *
+     * default:3041280B = 2970KB
      */
     unsigned int max_picture_buffer;
 
@@ -767,6 +771,7 @@ typedef struct AVFormatContext {
     /**
      * Remaining size available for raw_packet_buffer, in bytes.
      * NOT PART OF PUBLIC API
+     * 2500000B 约= 2.384185791 MB
      */
 #define RAW_PACKET_BUFFER_SIZE 2500000
     int raw_packet_buffer_remaining_size;

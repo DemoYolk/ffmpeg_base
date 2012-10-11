@@ -108,7 +108,9 @@ public class FFMpegPlayer {
 	public FFMpegPlayer() {
 		/*
 		 * Native setup requires a weak reference to our object. It's easier to
-		 * create it here than in C++.
+		 * create it here than in C++. 将本类传入到C++层 对应
+		 * com_media_ffmpeg_FFMpegPlayer.cpp
+		 * 里的com_media_ffmpeg_FFMpegPlayer_native_setup
 		 */
 		native_setup(new WeakReference<FFMpegPlayer>(this));
 	}

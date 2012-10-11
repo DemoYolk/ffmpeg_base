@@ -990,33 +990,33 @@ typedef struct AVPanScan{
 
 typedef struct AVPacket {
     /**
-     * Presentation timestamp in AVStream->time_base units; the time at which
-     * the decompressed packet will be presented to the user.
-     * Can be AV_NOPTS_VALUE if it is not stored in the file.
-     * pts MUST be larger or equal to dts as presentation cannot happen before
-     * decompression, unless one wants to view hex dumps. Some formats misuse
-     * the terms dts and pts/cts to mean something different. Such timestamps
+     * Presentation timestamp in AVStream->time_base units; the time at which （在媒体流时间基准单元里 作为显示时间戳 ）
+     * the decompressed packet will be presented to the user.（这个时间是解压完的包给用户的）
+     * Can be AV_NOPTS_VALUE if it is not stored in the file.（如果文件里没有给出，会是 AV_NOPTS_VALUE这个值：0x8000000000000000LL）
+     * pts MUST be larger or equal to dts as presentation cannot happen before （在被解压之前作为显示，pts必须至少大于或等于 dts ）
+     * decompression, unless one wants to view hex dumps. Some formats misuse （除非你想 查看16进制转存。一些 媒体样式 滥用 dts 和 pts/cts 带来一些不同。）
+     * the terms dts and pts/cts to mean something different. Such timestamps （那种 时间戳 必须被转换 为真正 pts/dts 在被包装到AVPacket之前）
      * must be converted to true pts/dts before they are stored in AVPacket.
      */
     int64_t pts;
     /**
      * Decompression timestamp in AVStream->time_base units; the time at which
-     * the packet is decompressed.
-     * Can be AV_NOPTS_VALUE if it is not stored in the file.
+     * the packet is decompressed. （在媒体流时间基准单元里 作为解压时间戳 ，这个时间是 这个包被解压的时间）
+     * Can be AV_NOPTS_VALUE if it is not stored in the file. （如果文件里记录，则会是 AV_NOPTS_VALUE）
      */
     int64_t dts;
-    uint8_t *data;
-    int   size;
-    int   stream_index;
-    int   flags;
+    uint8_t *data; //数据
+    int   size; //包大小
+    int   stream_index; //流索引
+    int   flags; //标记
     /**
      * Duration of this packet in AVStream->time_base units, 0 if unknown.
-     * Equals next_pts - this_pts in presentation order.
+     * Equals next_pts - this_pts in presentation order.（在媒体流时间基准单元里 作为这个包的长度，0为不知大小，在显示目录里可有 下一个pts 减去 本pts得到）
      */
     int   duration;
     void  (*destruct)(struct AVPacket *);
     void  *priv;
-    int64_t pos;                            ///< byte position in stream, -1 if unknown
+    int64_t pos;                            ///< byte position in stream, -1 if unknown 在流里的 字节位置
 
     /**
      * Time difference in AVStream->time_base units from the pts of this
@@ -1024,14 +1024,17 @@ typedef struct AVPacket {
      * independent from the availability of previous frames. That is, the
      * frames are virtually identical no matter if decoding started from
      * the very first frame or from this keyframe.
+     * （在媒体流基准单位的时差 ，通过这个包的pts到解码器输出上一可用帧的点得到。也就是说，这些帧几乎是相同的不管是从第一帧开始还是从这个关键帧开始）
      * Is AV_NOPTS_VALUE if unknown.
-     * This field is not the display duration of the current packet.
+     * This field is not the display duration of the current packet.（这个属性不是当前包的显示时间）
      *
      * The purpose of this field is to allow seeking in streams that have no
      * keyframes in the conventional sense. It corresponds to the
      * recovery point SEI in H.264 and match_time_delta in NUT. It is also
      * essential for some types of subtitle streams to ensure that all
      * subtitles are correctly displayed after seeking.
+     * （这个属性的目的是为了允许 在流里寻找传统意义上的 非关键帧。它对应了 H.264的回复点SEI 和 核心的match_time_delta。
+     *   它同样表达了一些子标题流的一些类型，为了在寻找后 所有的子标题都正确的播放）
      */
     int64_t convergence_duration;
 } AVPacket;
